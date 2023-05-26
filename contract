@@ -1,0 +1,27 @@
+
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.8.4 <0.9.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract CHAO is ERC20 {
+    address public constant MATIC = 0x0000000000000000000000000000000000001001;
+    address public constant CHAO_DEPOSIT_ADDRESS = 0x053239516b6DCA9a9DD00d6C0A71afA54793d1bE;
+
+    constructor() ERC20("CHAO", "CHAO") {
+        _mint(msg.sender, 500000 * (10 ** decimals()));
+    }
+
+    function swapMATIC() external {
+        uint256 chaoBalance = balanceOf(msg.sender);
+        require(chaoBalance >= 250000 * (10 ** decimals()), "Insufficient CHAO balance");
+
+        _approve(msg.sender, MATIC, (chaoBalance / 2) * (10 ** decimals()));
+
+        IERC20 chao = IERC20(address(this));
+        IERC20 matic = IERC20(MATIC);
+
+        chao.transferFrom(msg.sender, CHAO_DEPOSIT_ADDRESS, (chaoBalance / 2) * (10 ** decimals()));
+        matic.transfer(CHAO_DEPOSIT_ADDRESS, (chaoBalance / 2) * (10 ** decimals()));
+    }
+}
